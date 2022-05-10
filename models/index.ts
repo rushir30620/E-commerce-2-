@@ -2,6 +2,7 @@ import { BuildOptions, Model, Sequelize } from "sequelize";
 import { Contact, ContactModelAttributes } from "./contact";
 import { User, UserModelAttributes } from "./user";
 import { Product, ProductModelAttributes } from "./product";
+import { Cart, CartAttributes } from "./cart";
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -25,6 +26,10 @@ type UserModelStatic = typeof Model & {
 type ProductModelStatic = typeof Model & {
   new (values?: object, options?: BuildOptions): Product;
 };
+
+type CartModelStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): Cart;
+}
 
 //Define Models
 const ContactDefineModel = sequelize.define(
@@ -57,12 +62,23 @@ const ProductDefineModel = sequelize.define(
   }
 ) as ProductModelStatic;
 
+const CartDefineModel = sequelize.define(
+  'Cart',
+  {
+    ...CartAttributes
+  },
+  {
+    tableName: 'Cart'
+  }
+) as CartModelStatic;
+
 //Interfaces
 export interface DbContext {
   sequelize: Sequelize;
   Contact: ContactModelStatic;
   User: UserModelStatic;
   Product: ProductModelStatic;
+  Cart: CartModelStatic;
 }
 
 export const db: DbContext = {
@@ -70,7 +86,46 @@ export const db: DbContext = {
   Contact: ContactDefineModel,
   User: UserDefineModel,
   Product: ProductDefineModel,
+  Cart: CartDefineModel,
 }
+
+db.User.hasMany(db.Cart, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: false,
+  },
+  as: "UserCart",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.Cart.belongsTo(db.User, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: false,
+  },
+  as: "UserCart",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+
+db.Cart.hasMany(db.Product, {
+  foreignKey: {
+    name: "product_Id",
+    allowNull: false,
+  },
+  as: "CartProduct",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.Product.belongsTo(db.Cart, {
+  foreignKey: {
+    name: "product_Id",
+    allowNull: false,
+  },
+  as: "CartProduct",
+  constraints: true,
+  onDelete: "CASCADE",
+});
 
 export default db;
 
