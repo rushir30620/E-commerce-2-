@@ -45,7 +45,7 @@ var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var nodemailer_1 = __importDefault(require("nodemailer"));
 require('dotenv').config();
-var userTypeID = 1;
+var userTypeID = 1; // Admin
 var transporter = nodemailer_1.default.createTransport({
     service: process.env.SERVICE,
     auth: {
@@ -194,41 +194,6 @@ var UserController = /** @class */ (function () {
                     })];
             });
         }); };
-        this.validateTokenMiddleware = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var token;
-            var _this = this;
-            return __generator(this, function (_a) {
-                token = req.headers.authorization || req.header('auth');
-                if (token == null) {
-                    return [2 /*return*/, res.status(401).json({ message: "Invalid login credentials" })];
-                }
-                jsonwebtoken_1.default.verify(token, process.env.JWT_KEY, function (err, user) {
-                    if (err) {
-                        return res.status(403).json({ message: 'Invalid login credentials' });
-                    }
-                    else {
-                        //   console.log(user);
-                        req.body.user = user;
-                        return _this.userLoginService.loginUser(user.email)
-                            .then(function (user) {
-                            if (user === null) {
-                                return res.status(401).json({ message: 'user not found' });
-                            }
-                            else {
-                                next();
-                            }
-                        })
-                            .catch(function (error) {
-                            console.log(error);
-                            return res.status(500).json({
-                                error: error,
-                            });
-                        });
-                    }
-                });
-                return [2 /*return*/];
-            });
-        }); };
         this.deleteToken = function (req, res) {
             try {
                 res.clearCookie('token');
@@ -238,9 +203,124 @@ var UserController = /** @class */ (function () {
                 return res.status(401).json({ message: 'cannot logout' });
             }
         };
+        this.forgotPassword = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var userEmail;
+            var _this = this;
+            return __generator(this, function (_a) {
+                userEmail = req.body.email;
+                if (userEmail) {
+                    return [2 /*return*/, this.userLoginService.forgotPassword(userEmail)
+                            .then(function (user) { return __awaiter(_this, void 0, void 0, function () {
+                            var userId, token, mailOptions;
+                            return __generator(this, function (_a) {
+                                if (!user) {
+                                    return [2 /*return*/, res.status(400).json({ success: false, message: "User with given email doesn't exist" })];
+                                }
+                                ;
+                                userId = user.id;
+                                token = jsonwebtoken_1.default.sign({ userId: userId }, process.env.FORGOT_PASS_KEY, { expiresIn: '1h' });
+                                mailOptions = {
+                                    from: process.env.USER,
+                                    to: req.body.email,
+                                    subject: "Account Verification",
+                                    html: "<h4>Kindly click on the below link to reset your password</h2>\n                            <p>".concat(process.env.URL, "/reset-password/").concat(token)
+                                };
+                                transporter.sendMail(mailOptions, function (error, info) {
+                                    if (error) {
+                                        console.log(error);
+                                        // res.status(404).json({
+                                        //     error: error,
+                                        //     message: "Email cannot be sent.."
+                                        // });
+                                    }
+                                    else {
+                                        if (info.response.includes("OK")) {
+                                            console.log("email sent");
+                                            //    return res.status(200).json({
+                                            //         msg: "Email sent successfully !"
+                                            //     });
+                                        }
+                                    }
+                                });
+                                return [2 /*return*/, res.status(200).json({ success: true, message: "Password reset link successfully sent to your email account" })];
+                            });
+                        }); })
+                            .catch(function (error) {
+                            console.log(error);
+                            return res.status(500).json({ success: false, user: {}, error: { error: error } });
+                        })];
+                }
+                else {
+                    return [2 /*return*/, res.status(401).json({ success: false, message: "Email doesn't exist" })];
+                }
+                return [2 /*return*/];
+            });
+        }); };
+        this.resetPassword = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+            var token;
+            var _this = this;
+            return __generator(this, function (_a) {
+                token = req.body.token;
+                if (token) {
+                    jsonwebtoken_1.default.verify(token, process.env.FORGOT_PASS_KEY, function (error, decodedToken) { return __awaiter(_this, void 0, void 0, function () {
+                        var userId;
+                        var _this = this;
+                        return __generator(this, function (_a) {
+                            if (error) {
+                                return [2 /*return*/, res.status(400).json({
+                                        success: false,
+                                        error: "Incorrect Link"
+                                    })];
+                            }
+                            userId = decodedToken.userId;
+                            return [2 /*return*/, this.userLoginService.resetPassword(userId)
+                                    .then(function (user) { return __awaiter(_this, void 0, void 0, function () {
+                                    var passwordMatch, _a;
+                                    return __generator(this, function (_b) {
+                                        switch (_b.label) {
+                                            case 0:
+                                                if (!user) {
+                                                    return [2 /*return*/, res.status(400).json({ success: false, message: "User with given email doesn't exist" })];
+                                                }
+                                                return [4 /*yield*/, bcryptjs_1.default.compare(req.body.newPassword, user.password)];
+                                            case 1:
+                                                passwordMatch = _b.sent();
+                                                if (!passwordMatch) return [3 /*break*/, 2];
+                                                return [2 /*return*/, res.status(200).json({ success: true, message: "This password used recently. Please choose different password" })];
+                                            case 2:
+                                                _a = user;
+                                                return [4 /*yield*/, bcryptjs_1.default.hash(req.body.newPassword, 10)];
+                                            case 3:
+                                                _a.password = _b.sent();
+                                                return [2 /*return*/, this.userLoginService.updateUser(user.password, userId)
+                                                        .then(function (user) {
+                                                        return res.status(200).json({ success: true, user: user, message: "Password reset successfully" });
+                                                    })
+                                                        .catch(function (error) {
+                                                        console.log(error);
+                                                        return res.status(500).json({ success: false, user: {}, error: { error: error } });
+                                                    })];
+                                        }
+                                    });
+                                }); })
+                                    .catch(function (error) {
+                                    console.log(error);
+                                    return res.status(500).json({ success: false, user: {}, error: { error: error } });
+                                })];
+                        });
+                    }); });
+                }
+                else {
+                    return [2 /*return*/, res.status(402).json({ success: false, message: "Somethin went wrong" })];
+                }
+                ;
+                return [2 /*return*/];
+            });
+        }); };
         this.userLoginService = userLoginService;
     }
     ;
     return UserController;
 }());
 exports.UserController = UserController;
+//# sourceMappingURL=user.login.js.map

@@ -1,7 +1,7 @@
 import { Model, DataTypes, ModelAttributes } from "sequelize";
 
 export class Product extends Model {
-    id!: number;
+    product_Id!: number;
 
     title?: string;
 
@@ -23,9 +23,10 @@ export class Product extends Model {
 };
 
 export const ProductModelAttributes: ModelAttributes = {
-    id: {
-        autoIncrement: true,
-        type: DataTypes.BIGINT,
+    product_Id: {
+        // autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true
     },

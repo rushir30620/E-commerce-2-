@@ -42,9 +42,10 @@ var AddProductController = /** @class */ (function () {
         var _this = this;
         this.addProductService = addProductService;
         this.addProduct = function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
+            var _a;
+            return __generator(this, function (_b) {
                 if (req.body.user.userTypeId === 1) {
-                    // req.body.image = req.file?.originalname;
+                    req.body.image = (_a = req.file) === null || _a === void 0 ? void 0 : _a.originalname;
                     return [2 /*return*/, this.addProductService.addProduct(req.body)
                             .then(function (product) {
                             if (product) {

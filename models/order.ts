@@ -1,27 +1,48 @@
-import { Model, DataTypes, ModelAttributes } from "sequelize/types";
+import { Model, DataTypes, ModelAttributes, ArrayDataType } from "sequelize";
 
-export class Cart extends Model {
+export class Order extends Model {
 
     order_Id!: number;
     user_Id!: number;
     product_Id!: number;
+    products!: Array<String>;
     quantity!: number;
     amount!: number;
     status!: string;
+    orderDate!: Date;
     orderAcceptedDate!: Date;
+    paymentStatus!: string;
     refundedAmount!: number;
+    comment!: string;
 
 }
 
-export const CartAttributes: ModelAttributes = {
+export const OrderAttributes: ModelAttributes = {
     order_Id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+    },
+    user_Id: {
+        references: {
+            model: "User",
+            key: "id"
+        },
+        type: DataTypes.UUID
+    },
+    product_Id: {
+        references: {
+            model: 'Product',
+            key: 'product_Id'
+        },
+        type: DataTypes.UUID
+    },
+    products: {
+        type: DataTypes.ARRAY(DataTypes.STRING)
     },
     quantity: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     amount: {
@@ -32,13 +53,27 @@ export const CartAttributes: ModelAttributes = {
         type: DataTypes.STRING,
         allowNull: false
     },
+    orderDate: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
     orderAcceptedDate: {
         type: DataTypes.DATE,
         allowNull: true
     },
+    orderDeliveryDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    paymentStatus: {
+        type: DataTypes.STRING
+    },
     refundedAmount: {
         type: DataTypes.DECIMAL,
         allowNull: true
+    },
+    comment: {
+        type: DataTypes.STRING
     },
     createdAt: {
         allowNull: false,

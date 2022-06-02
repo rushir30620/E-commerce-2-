@@ -1,17 +1,17 @@
 import express from "express";
 import { celebrate } from "celebrate";
-import { ContactUserService } from "../services/contact.service";
-import { ContactUserController } from "../controller/contact";
+import { IndexController } from "../controller";
+import { IndexValidation } from "../Validation/index.validation";
 import { ContactUserSchema } from "../Validation/contact.validation";
 
-const { get, add } = ContactUserSchema;
+const { getContactId, addContact } = ContactUserSchema;
 const router: express.Router = express.Router();
 
-const service: ContactUserService = new ContactUserService();
-const controller: ContactUserController = new ContactUserController(service);
+const indexController: IndexController = new IndexController();
+const contactController = indexController.ContactUserController;
 
-router.post('/contactUser', celebrate(add), controller.createContactUser);
-router.get('/allContactUser', controller.getAllContactUsers);
-router.get('/getContactUser/:id', celebrate(get), controller.getContactUserById);
+router.post('/contactUser', celebrate(addContact), contactController.createContactUser);
+router.get('/allContactUser', contactController.getAllContactUsers);
+router.get('/getContactUser/:id', celebrate(getContactId), contactController.getContactUserById);
 
 export = router;

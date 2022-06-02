@@ -46,22 +46,33 @@ var body_parser_1 = __importDefault(require("body-parser"));
 var models_1 = require("./models");
 var multer_1 = __importDefault(require("multer"));
 //Routes import
-var contact_route_1 = __importDefault(require("./routes/contact.route"));
-var user_routes_1 = __importDefault(require("./routes/user.routes"));
-var add_product_routes_1 = __importDefault(require("./routes/add-product.routes"));
+// import contactRouter from "./routes/contact.route";
+// import userRouter from "./routes/user.routes";
+// import addProductRouter from "./routes/product.routes";
+// import cartRouter from "./routes/cart.routes";
+// import orderRouter from "./routes/order.routes";
+var payment_routes_1 = __importDefault(require("./routes/payment.routes"));
+// import customerRouter from "./routes/customer.routes";
+var index_routes_1 = __importDefault(require("./routes/index.routes"));
 dotenv_1.default.config();
 var hostname = 'localhost';
 var port = process.env.PORT || 3000;
 var app = (0, express_1.default)();
 var server = http_1.default.createServer(app);
 app.use(express_1.default.json());
-app.use('/', contact_route_1.default);
-app.use('/', user_routes_1.default);
-app.use('/', add_product_routes_1.default);
+app.set('view engine', 'ejs');
+app.set('views', 'view');
 //Parse incoming requests data
 app.use(body_parser_1.default.json());
-app.use(body_parser_1.default.urlencoded({ extended: false }));
+app.use(body_parser_1.default.urlencoded({ extended: true }));
 app.use((0, multer_1.default)({ dest: 'images' }).single('file'));
+app.use('/', index_routes_1.default);
+// app.use('/', userRouter);
+// app.use('/', addProductRouter);
+// app.use('/', cartRouter);
+// app.use('/', orderRouter);
+app.use('/', payment_routes_1.default);
+// app.use('/', customerRouter);
 server.listen(port, function () {
     console.log("Server running at http://".concat(hostname, ":").concat(port, "/"));
     models_1.sequelize.authenticate().then(function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -74,3 +85,4 @@ server.listen(port, function () {
         console.log(e.message);
     });
 });
+//# sourceMappingURL=app.js.map

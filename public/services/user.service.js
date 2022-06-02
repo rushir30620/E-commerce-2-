@@ -55,6 +55,28 @@ var UserLoginService = /** @class */ (function () {
             });
         });
     };
+    UserLoginService.prototype.forgotPassword = function (userEmail) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, index_1.db.User.findOne({ where: { email: userEmail } })];
+            });
+        });
+    };
+    UserLoginService.prototype.resetPassword = function (userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, index_1.db.User.findOne({ where: { id: userId } })];
+            });
+        });
+    };
+    UserLoginService.prototype.updateUser = function (password, userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, index_1.db.User.update({ password: password }, { where: { id: userId } })];
+            });
+        });
+    };
     return UserLoginService;
 }());
 exports.UserLoginService = UserLoginService;
+//# sourceMappingURL=user.service.js.map

@@ -27,9 +27,10 @@ var Product = /** @class */ (function (_super) {
 exports.Product = Product;
 ;
 exports.ProductModelAttributes = {
-    id: {
-        autoIncrement: true,
-        type: sequelize_1.DataTypes.BIGINT,
+    product_Id: {
+        // autoIncrement: true,
+        type: sequelize_1.DataTypes.UUID,
+        defaultValue: sequelize_1.DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true
     },
@@ -89,3 +90,4 @@ exports.ProductModelAttributes = {
 //   });
 //   return Product;
 // };
+//# sourceMappingURL=product.js.map

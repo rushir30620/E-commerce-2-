@@ -4,14 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var express_1 = __importDefault(require("express"));
 var celebrate_1 = require("celebrate");
-var contact_service_1 = require("../services/contact.service");
-var contact_1 = require("../controller/contact");
+var controller_1 = require("../controller");
 var contact_validation_1 = require("../Validation/contact.validation");
-var get = contact_validation_1.ContactUserSchema.get, add = contact_validation_1.ContactUserSchema.add;
+var getContactId = contact_validation_1.ContactUserSchema.getContactId, addContact = contact_validation_1.ContactUserSchema.addContact;
 var router = express_1.default.Router();
-var service = new contact_service_1.ContactUserService();
-var controller = new contact_1.ContactUserController(service);
-router.post('/contactUser', (0, celebrate_1.celebrate)(add), controller.createContactUser);
-router.get('/allContactUser', controller.getAllContactUsers);
-router.get('/getContactUser/:id', (0, celebrate_1.celebrate)(get), controller.getContactUserById);
+var indexController = new controller_1.IndexController();
+var contactController = indexController.ContactUserController;
+router.post('/contactUser', (0, celebrate_1.celebrate)(addContact), contactController.createContactUser);
+router.get('/allContactUser', contactController.getAllContactUsers);
+router.get('/getContactUser/:id', (0, celebrate_1.celebrate)(getContactId), contactController.getContactUserById);
 module.exports = router;
+//# sourceMappingURL=contact.route.js.map

@@ -28,8 +28,9 @@ exports.Contact = Contact;
 ;
 exports.ContactModelAttributes = {
     id: {
-        autoIncrement: true,
-        type: sequelize_1.DataTypes.BIGINT,
+        // autoIncrement: true,
+        type: sequelize_1.DataTypes.UUID,
+        defaultValue: sequelize_1.DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true
     },
@@ -81,3 +82,4 @@ exports.ContactModelAttributes = {
 //   });
 //   return contact;
 // };
+//# sourceMappingURL=contact.js.map

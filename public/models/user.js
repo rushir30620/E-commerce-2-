@@ -28,8 +28,9 @@ exports.User = User;
 ;
 exports.UserModelAttributes = {
     id: {
-        autoIncrement: true,
-        type: sequelize_1.DataTypes.BIGINT,
+        // autoIncrement: true,
+        type: sequelize_1.DataTypes.UUID,
+        defaultValue: sequelize_1.DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true
     },
@@ -111,3 +112,4 @@ exports.UserModelAttributes = {
 //   });
 //   return Customer;
 // };
+//# sourceMappingURL=user.js.map

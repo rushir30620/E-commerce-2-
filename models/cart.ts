@@ -1,56 +1,48 @@
-import { Model, DataTypes, ModelAttributes } from "sequelize/types";
+import { Model, DataTypes, ModelAttributes } from "sequelize";
 
 export class Cart extends Model {
 
     cart_Id!: number;
     user_Id!: number;
     userName!: string;
-    // products!: [
-    //     {
-    //         product: { type: Object, required: true },
-    //         quantity: { type: Number, required: true }
-    //     }
-    // ];
     product_Id!: number;
     quantity!: number;
+    price!: number;
 
 }
 
 export const CartAttributes: ModelAttributes = {
     cart_Id: {
         allowNull: false,
-        autoIncrement: true,
+        // autoIncrement: true,
         primaryKey: true,
-        type: DataTypes.INTEGER
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
     },
-    //   userId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //       model: 'User',
-    //       key: 'id',
-    //       as: 'userId'
-    //     }
-    //   },
+    user_Id: {
+        references: {
+            model: 'User',
+            key: 'id'
+        },
+        type: DataTypes.UUID,
+    },
     userName: {
         type: DataTypes.STRING
     },
-    product_Id:
-    {
-        type: DataTypes.NUMBER,
-        allowNull: false
+    product_Id: {
+        references: {
+            model: 'Product',
+            key: 'product_Id'
+        },
+        type: DataTypes.UUID,
     },
     quantity: {
         type: DataTypes.NUMBER,
         allowNull: false
     },
-    // products!: [
-    //     {
-    //         product: { type: Object, required: true },
-    //         quantity: { type: Number, required: true }
-    //     }
-    // ],
-
+    price: {
+        type: DataTypes.INTEGER,
+    },
     createdAt: {
         allowNull: false,
         type: DataTypes.DATE

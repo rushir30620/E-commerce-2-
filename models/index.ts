@@ -3,6 +3,10 @@ import { Contact, ContactModelAttributes } from "./contact";
 import { User, UserModelAttributes } from "./user";
 import { Product, ProductModelAttributes } from "./product";
 import { Cart, CartAttributes } from "./cart";
+import { Order, OrderAttributes } from "./order";
+import { OrderAddress, OrderAddressAttributes } from "./orderaddress";
+import { UserAddress, UserAddressAttributes } from "./useraddress";
+import { Rating, RatingAttributes } from "./rating";
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -29,6 +33,22 @@ type ProductModelStatic = typeof Model & {
 
 type CartModelStatic = typeof Model & {
   new (values?: object, options?: BuildOptions): Cart;
+};
+
+type OrderModelStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): Order;
+};
+
+type OrderAddressModelStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): OrderAddress;
+};
+
+type UserAddressModelStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): UserAddress;
+}
+
+type RatingModelStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): Rating;
 }
 
 //Define Models
@@ -72,6 +92,47 @@ const CartDefineModel = sequelize.define(
   }
 ) as CartModelStatic;
 
+const OrderDefineModel = sequelize.define(
+  'Order',
+  {
+    ...OrderAttributes
+  },
+  {
+    tableName: 'Order'
+  }
+) as OrderModelStatic;
+
+const OrderAddressDefineModel = sequelize.define(
+  'OrderAddress',
+  {
+    ...OrderAddressAttributes
+  },
+  {
+    tableName: 'OrderAddress'
+  }
+) as OrderAddressModelStatic;
+
+const UserAddressDefineModel = sequelize.define(
+  'UserAddress',
+  {
+    ...UserAddressAttributes
+  },
+  {
+    tableName: 'UserAddress'
+  }
+) as UserAddressModelStatic;
+
+const RatingDefineModel = sequelize.define(
+  'Rating',
+  {
+    ...RatingAttributes
+  },
+  {
+    tableName: 'Rating'
+  }
+) as RatingModelStatic;
+
+
 //Interfaces
 export interface DbContext {
   sequelize: Sequelize;
@@ -79,6 +140,10 @@ export interface DbContext {
   User: UserModelStatic;
   Product: ProductModelStatic;
   Cart: CartModelStatic;
+  Order: OrderModelStatic;
+  OrderAddress: OrderAddressModelStatic;
+  UserAddress: UserAddressModelStatic;
+  Rating: RatingModelStatic;
 }
 
 export const db: DbContext = {
@@ -87,8 +152,13 @@ export const db: DbContext = {
   User: UserDefineModel,
   Product: ProductDefineModel,
   Cart: CartDefineModel,
+  Order: OrderDefineModel,
+  OrderAddress: OrderAddressDefineModel,
+  UserAddress: UserAddressDefineModel,
+  Rating: RatingDefineModel,
 }
 
+// User and cart associations
 db.User.hasMany(db.Cart, {
   foreignKey: {
     name: "user_Id",
@@ -108,10 +178,11 @@ db.Cart.belongsTo(db.User, {
   onDelete: "CASCADE",
 });
 
+// product and cart associations
 db.Cart.hasMany(db.Product, {
   foreignKey: {
     name: "product_Id",
-    allowNull: false,
+    allowNull: true,
   },
   as: "CartProduct",
   constraints: true,
@@ -120,11 +191,128 @@ db.Cart.hasMany(db.Product, {
 db.Product.belongsTo(db.Cart, {
   foreignKey: {
     name: "product_Id",
-    allowNull: false,
+    allowNull: true,
   },
   as: "CartProduct",
   constraints: true,
   onDelete: "CASCADE",
+});
+
+// order and orderaddress associations
+db.Order.hasOne(db.OrderAddress, {
+  foreignKey: {
+    name: "order_Id",
+    allowNull: false,
+  },
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.OrderAddress.belongsTo(db.Order, {
+  foreignKey: {
+    name: "order_Id",
+    allowNull: false,
+  },
+  constraints: true,
+  onDelete: "CASCADE",
+});
+
+// order and user associations
+db.User.hasMany(db.Order, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: true,
+  },
+  as: "UserOrder",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.Order.belongsTo(db.User, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: true,
+  },
+  as: "UserOrder",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+
+// product and order associations
+db.Order.hasMany(db.Product, {
+  foreignKey: {
+    name: "product_Id",
+    allowNull: true,
+  },
+  as: "OrderProduct",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.Product.belongsTo(db.Order, {
+  foreignKey: {
+    name: "product_Id",
+    allowNull: true,
+  },
+  as: "OrderProduct",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+
+// user and userAddress associations
+db.User.hasMany(db.UserAddress, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: true,
+  },
+  as: "UserAddress",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+db.UserAddress.belongsTo(db.User, {
+  foreignKey: {
+    name: "user_Id",
+    allowNull: true,
+  },
+  as: "UserAddress",
+  constraints: true,
+  onDelete: "CASCADE",
+});
+
+db.User.hasMany(db.Rating, {
+  foreignKey: {
+    name: "RatingFrom",
+    allowNull: false
+  },
+  as: "RatingFrom",
+  constraints: true,
+  onDelete: "CASCADE"
+});
+
+db.Product.hasMany(db.Rating, {
+  foreignKey: {
+    name: "RatingTo",
+    allowNull: false
+  },
+  as: "RatingTo",
+  constraints: true,
+  onDelete: "CASCADE"
+});
+
+db.Order.hasMany(db.Rating, {
+  foreignKey: {
+    name: "order_Id",
+    allowNull: false
+  },
+  as: "orderRating",
+  constraints: true,
+  onDelete: "CASCADE"
+});
+db.Rating.belongsTo(db.Order, {
+  foreignKey: {
+    name: "order_Id",
+    allowNull: false
+  },
+  as: "orderRating",
+  constraints: true,
+  onDelete: "CASCADE"
 });
 
 export default db;

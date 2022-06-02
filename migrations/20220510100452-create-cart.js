@@ -4,12 +4,13 @@ module.exports = {
     await queryInterface.createTable('Cart', {
       cart_Id: {
         allowNull: false,
-        autoIncrement: true,
+        // autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       user_Id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'User',
@@ -21,17 +22,19 @@ module.exports = {
         type: Sequelize.STRING
       },
       product_Id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: 'Product',
-          key: 'id',
+          key: 'product_Id',
           as: 'product_Id'
-        },
-        allowNull: false
+        }
       },
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false
+      },
+      price: {
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,

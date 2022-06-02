@@ -18,8 +18,9 @@ export class Contact extends Model {
 
 export const ContactModelAttributes: ModelAttributes = {
   id: {
-    autoIncrement: true,
-    type: DataTypes.BIGINT,
+    // autoIncrement: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true
   },

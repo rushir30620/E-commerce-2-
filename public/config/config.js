@@ -24,3 +24,4 @@ module.exports = {
         "dialect": "mysql"
     }
 };
+//# sourceMappingURL=config.js.map

@@ -17,6 +17,11 @@ Object.defineProperty(exports, "Sequelize", { enumerable: true, get: function ()
 var contact_1 = require("./contact");
 var user_1 = require("./user");
 var product_1 = require("./product");
+var cart_1 = require("./cart");
+var order_1 = require("./order");
+var orderaddress_1 = require("./orderaddress");
+var useraddress_1 = require("./useraddress");
+var rating_1 = require("./rating");
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config/config')[env];
 var sequelize = config.url
@@ -33,12 +38,180 @@ var UserDefineModel = sequelize.define('User', __assign({}, user_1.UserModelAttr
 var ProductDefineModel = sequelize.define('Product', __assign({}, product_1.ProductModelAttributes), {
     tableName: 'Product'
 });
+var CartDefineModel = sequelize.define('Cart', __assign({}, cart_1.CartAttributes), {
+    tableName: 'Cart'
+});
+var OrderDefineModel = sequelize.define('Order', __assign({}, order_1.OrderAttributes), {
+    tableName: 'Order'
+});
+var OrderAddressDefineModel = sequelize.define('OrderAddress', __assign({}, orderaddress_1.OrderAddressAttributes), {
+    tableName: 'OrderAddress'
+});
+var UserAddressDefineModel = sequelize.define('UserAddress', __assign({}, useraddress_1.UserAddressAttributes), {
+    tableName: 'UserAddress'
+});
+var RatingDefineModel = sequelize.define('Rating', __assign({}, rating_1.RatingAttributes), {
+    tableName: 'Rating'
+});
 exports.db = {
     sequelize: sequelize,
     Contact: ContactDefineModel,
     User: UserDefineModel,
     Product: ProductDefineModel,
+    Cart: CartDefineModel,
+    Order: OrderDefineModel,
+    OrderAddress: OrderAddressDefineModel,
+    UserAddress: UserAddressDefineModel,
+    Rating: RatingDefineModel,
 };
+// User and cart associations
+exports.db.User.hasMany(exports.db.Cart, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: false,
+    },
+    as: "UserCart",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.Cart.belongsTo(exports.db.User, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: false,
+    },
+    as: "UserCart",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+// product and cart associations
+exports.db.Cart.hasMany(exports.db.Product, {
+    foreignKey: {
+        name: "product_Id",
+        allowNull: true,
+    },
+    as: "CartProduct",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.Product.belongsTo(exports.db.Cart, {
+    foreignKey: {
+        name: "product_Id",
+        allowNull: true,
+    },
+    as: "CartProduct",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+// order and orderaddress associations
+exports.db.Order.hasOne(exports.db.OrderAddress, {
+    foreignKey: {
+        name: "order_Id",
+        allowNull: false,
+    },
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.OrderAddress.belongsTo(exports.db.Order, {
+    foreignKey: {
+        name: "order_Id",
+        allowNull: false,
+    },
+    constraints: true,
+    onDelete: "CASCADE",
+});
+// order and user associations
+exports.db.User.hasMany(exports.db.Order, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: true,
+    },
+    as: "UserOrder",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.Order.belongsTo(exports.db.User, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: true,
+    },
+    as: "UserOrder",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+// product and order associations
+exports.db.Order.hasMany(exports.db.Product, {
+    foreignKey: {
+        name: "product_Id",
+        allowNull: true,
+    },
+    as: "OrderProduct",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.Product.belongsTo(exports.db.Order, {
+    foreignKey: {
+        name: "product_Id",
+        allowNull: true,
+    },
+    as: "OrderProduct",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+// user and userAddress associations
+exports.db.User.hasMany(exports.db.UserAddress, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: true,
+    },
+    as: "UserAddress",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.UserAddress.belongsTo(exports.db.User, {
+    foreignKey: {
+        name: "user_Id",
+        allowNull: true,
+    },
+    as: "UserAddress",
+    constraints: true,
+    onDelete: "CASCADE",
+});
+exports.db.User.hasMany(exports.db.Rating, {
+    foreignKey: {
+        name: "RatingFrom",
+        allowNull: false
+    },
+    as: "RatingFrom",
+    constraints: true,
+    onDelete: "CASCADE"
+});
+exports.db.Product.hasMany(exports.db.Rating, {
+    foreignKey: {
+        name: "RatingTo",
+        allowNull: false
+    },
+    as: "RatingTo",
+    constraints: true,
+    onDelete: "CASCADE"
+});
+exports.db.Order.hasMany(exports.db.Rating, {
+    foreignKey: {
+        name: "order_Id",
+        allowNull: false
+    },
+    as: "orderRating",
+    constraints: true,
+    onDelete: "CASCADE"
+});
+exports.db.Rating.belongsTo(exports.db.Order, {
+    foreignKey: {
+        name: "order_Id",
+        allowNull: false
+    },
+    as: "orderRating",
+    constraints: true,
+    onDelete: "CASCADE"
+});
 exports.default = exports.db;
 // 'use strict';
 // const fs = require('fs');
@@ -71,3 +244,4 @@ exports.default = exports.db;
 // db.sequelize = sequelize;
 // db.Sequelize = Sequelize;
 // module.exports = db;
+//# sourceMappingURL=index.js.map

@@ -9,10 +9,10 @@ var params = {
         .description('Id of User')
 };
 exports.ContactUserSchema = {
-    get: {
+    getContactId: {
         params: params
     },
-    add: {
+    addContact: {
         body: celebrate_1.Joi.object({
             name: celebrate_1.Joi.string()
                 .required()
@@ -35,3 +35,4 @@ exports.ContactUserSchema = {
         })
     }
 };
+//# sourceMappingURL=contact.validation.js.map

@@ -1,19 +1,20 @@
 import express from "express";
 import { celebrate } from "celebrate";
-import { UserLoginService } from "../services/user.service";
-import { UserController } from "../controller/user.login";
+import { IndexController } from "../controller";
 import { UserSchema } from "../Validation/user.validation";
 
-const { add, addLogin } = UserSchema;
+const { add, addLogin, addForgotPass, addNewPassword } = UserSchema;
 
 const router: express.Router = express.Router();
 
-const userService: UserLoginService = new UserLoginService();
-const userController: UserController = new UserController(userService);
+const indexController: IndexController = new IndexController();
+const userController = indexController.UserController; 
 
 router.post('/signup', celebrate(add), userController.createUser);
 router.get('/verify/user/:token', userController.verifyEmail);
 router.post('/login', celebrate(addLogin), userController.loginUser);
 router.delete('/logout', userController.deleteToken);
+router.post('/forgotPassword', celebrate(addForgotPass), userController.forgotPassword);
+router.post('/reset-Password', celebrate(addNewPassword), userController.resetPassword);
 
 export = router;

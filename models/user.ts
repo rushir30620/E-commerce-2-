@@ -30,8 +30,9 @@ export class User extends Model {
 
 export const UserModelAttributes: ModelAttributes = {
     id: {
-        autoIncrement: true,
-        type: DataTypes.BIGINT,
+        // autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
         primaryKey: true
     },

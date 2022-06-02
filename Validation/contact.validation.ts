@@ -8,10 +8,10 @@ const params: object = {
 };
 
 export const ContactUserSchema = {
-    get: {
+    getContactId: {
         params: params
     },
-    add: {
+    addContact: {
         body: Joi.object({
             name: Joi.string()
                 .required()

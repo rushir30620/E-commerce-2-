@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 require('dotenv').config();
 
-const userTypeID: number = 1;
+const userTypeID: number = 1;        // Admin
 
 const transporter = nodemailer.createTransport({
     service: process.env.SERVICE,
@@ -135,39 +135,6 @@ export class UserController {
         })
     };
 
-    public validateTokenMiddleware = async (req: Request, res: Response, next: NextFunction) :Promise<Response|undefined>=> {
-        // const authHeader = req.get("authorization");
-        const token = req.headers.authorization || req.header('auth') ;
-    
-        if (token == null) {
-          return res.status(401).json({ message: "Invalid login credentials" });
-        }
-        jwt.verify(token, process.env.JWT_KEY!, (err, user:any) => {
-          if (err) {
-            return res.status(403).json({message:'Invalid login credentials'});
-          } else {
-            //   console.log(user);
-              req.body.user = user;
-            return this.userLoginService.loginUser(user.email)
-            .then(user => {
-              if(user === null){
-                return res.status(401).json({message:'user not found'});
-              }else{
-                next();
-              }
-            })
-            .catch((error: Error) => {
-              console.log(error);
-              return res.status(500).json({
-                error: error,
-              });
-            });
-            
-          }
-        });
-      };
-
-
     public deleteToken = (req: Request, res: Response) => {
         try {
           res.clearCookie('token');
@@ -177,4 +144,91 @@ export class UserController {
           return res.status(401).json({message:'cannot logout'});
         }
     };
+
+    public forgotPassword = async(req:Request, res:Response): Promise<Response> => {
+        const userEmail: string = req.body.email;
+        if(userEmail){
+            return this.userLoginService.forgotPassword(userEmail)
+            .then(async (user) => {
+                if(!user){
+                    return res.status(400).json({ success: false, message: "User with given email doesn't exist"});
+                };
+                const userId = user.id;
+                let token = jwt.sign({userId}, process.env.FORGOT_PASS_KEY!, {expiresIn:'1h'});
+                const mailOptions = {
+                    from: process.env.USER,
+                    to: req.body.email,
+                    subject: "Account Verification",
+                    html: `<h4>Kindly click on the below link to reset your password</h2>
+                            <p>${process.env.URL}/reset-password/${token}`
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                        // res.status(404).json({
+                        //     error: error,
+                        //     message: "Email cannot be sent.."
+                        // });
+                    }
+                    else {
+                        if (info.response.includes("OK")) {
+                            console.log("email sent");
+                        //    return res.status(200).json({
+                        //         msg: "Email sent successfully !"
+                        //     });
+                        }
+                    }
+                })
+                return res.status(200).json({success:true, message: "Password reset link successfully sent to your email account"});
+            })
+            .catch((error: Error) => {
+                console.log(error);
+                return res.status(500).json({ success: false, user: {}, error: { error: error } });
+            })
+        } else{
+            return res.status(401).json({success:false, message: "Email doesn't exist"});
+        }
+    };
+
+    public resetPassword = async(req:Request, res:Response): Promise<Response | undefined> => {
+        const token: string = req.body.token;
+        if(token){
+            jwt.verify(token, process.env.FORGOT_PASS_KEY!, async(error:any,decodedToken:any) => {
+                if(error){
+                    return res.status(400).json({
+                        success: false,
+                        error: "Incorrect Link"
+                    })
+                }
+                const userId: number = decodedToken.userId;
+                return this.userLoginService.resetPassword(userId)
+                .then(async (user) => {
+                    if(!user){
+                        return res.status(400).json({ success: false, message: "User with given email doesn't exist"});
+                    }
+                    const passwordMatch = await bcrypt.compare(req.body.newPassword, user.password!);
+                    if(passwordMatch){
+                        return res.status(200).json({success:true, message: "This password used recently. Please choose different password"});
+                    }
+                    else{
+                        user.password = await bcrypt.hash(req.body.newPassword, 10);
+                        return this.userLoginService.updateUser(user.password,userId)
+                        .then((user) => {
+                            return res.status(200).json({ success:true, user, message: "Password reset successfully"})
+                        })
+                        .catch((error: Error) => {
+                            console.log(error);
+                            return res.status(500).json({ success: false, user: {}, error: { error: error } });
+                        })
+                    }
+                })
+                .catch((error: Error) => {
+                    console.log(error);
+                    return res.status(500).json({ success: false, user: {}, error: { error: error } });
+                })
+            })
+        }else{
+            return res.status(402).json({ success: false, message: "Somethin went wrong"});
+        };
+    }
 }

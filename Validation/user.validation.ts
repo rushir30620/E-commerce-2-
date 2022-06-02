@@ -1,8 +1,7 @@
 import { Joi } from 'celebrate';
 
 const params: object = {
-    id: Joi.number()
-        .integer()
+    id: Joi.string()
         .required()
         .description('Id of User')
 };
@@ -59,5 +58,24 @@ export const UserSchema = {
                     .required()
                     .description("User Password"),
         })
-    }
+    },
+    addForgotPass: {
+        body: Joi.object({
+            email: Joi.string()
+                    .required()
+                    .email()
+                    .example('rushi@gmail.com')
+                    .description('User Email'),
+        })
+    },
+    addNewPassword: {
+        body: Joi.object({
+            token: Joi.string()
+                    .required()
+                    .description('reset password link'),
+            newPassword: Joi.string()
+                    .required()
+                    .description('New password of user'),
+        })
+    },
 }
